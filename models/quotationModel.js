@@ -38,7 +38,7 @@ const productItemSchema = new mongoose.Schema({
   totalAmount: Number, 
 });
 
-const invoiceSchema = new mongoose.Schema({
+const quotationSchema = new mongoose.Schema({
   customer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
@@ -53,7 +53,7 @@ const invoiceSchema = new mongoose.Schema({
     ref: "Signature",
   },
   products: [productItemSchema],
-  invoiceDate: {
+  quotationDate: {
     type: Date,
     required: true,
   },
@@ -84,4 +84,4 @@ const invoiceSchema = new mongoose.Schema({
   },
 });
 
-export const Invoice = mongoose.model("Invoice", invoiceSchema);
+export const Quotation = mongoose.model("Quotation", quotationSchema);

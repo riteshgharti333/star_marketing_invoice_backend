@@ -18,6 +18,19 @@ const customerSchema = new mongoose.Schema(
       trim: true,
       match: [/\S+@\S+\.\S+/, "Please enter a valid email"],
     },
+    invoiceId: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Invoice",
+      },
+    ],
+
+    quotationId: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Quotation",
+      },
+    ],
   },
   {
     timestamps: true,

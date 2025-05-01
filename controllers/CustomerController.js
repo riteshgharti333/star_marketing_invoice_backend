@@ -43,7 +43,7 @@ export const getCustomer = catchAsyncError(async (req, res, next) => {
 
 // GET ALL CUSTOMERS
 export const getAllCustomers = catchAsyncError(async (req, res, next) => {
-  const customers = await Customer.find();
+  const customers = await Customer.find().sort({ createdAt: -1 });
 
   res.status(200).json({
     result: 1,
@@ -106,9 +106,7 @@ export const searchCustomersByName = catchAsyncError(async (req, res, next) => {
   }
 
   const customers = await Customer.find({
-    $or: [
-      { name: { $regex: query, $options: 'i' } },
-    ],
+    $or: [{ name: { $regex: query, $options: "i" } }],
   });
 
   if (customers.length === 0) {

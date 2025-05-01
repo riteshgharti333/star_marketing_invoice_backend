@@ -49,7 +49,7 @@ export const getProduct = catchAsyncError(async (req, res, next) => {
 
 // GET ALL productS
 export const getAllProducts = catchAsyncError(async (req, res, next) => {
-  const products = await Product.find();
+  const products = await Product.find().sort({ createdAt: -1 });
 
   res.status(200).json({
     result: 1,

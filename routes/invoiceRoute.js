@@ -5,6 +5,7 @@ import {
   getInvoice,
   updateInvoice,
   deleteInvoice,
+  searchInvoicesByCustomerName,
 } from "../controllers/InvoiceController.js";
 
 const router = express.Router();
@@ -15,6 +16,9 @@ router.post("/new-invoice", createInvoice);
 // GET /invoice - get all invoices
 router.get("/all-invoices", getAllInvoices);
 
+router.get("/search", searchInvoicesByCustomerName);
+
+
 // GET /invoice/:id - get a specific invoice by ID
 router.get("/:id", getInvoice);
 
@@ -23,5 +27,8 @@ router.put("/:id", updateInvoice);
 
 // DELETE /invoice/:id - delete an invoice
 router.delete("/:id", deleteInvoice);
+
+
+
 
 export default router;

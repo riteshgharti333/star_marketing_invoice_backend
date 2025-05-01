@@ -1,18 +1,18 @@
-import { Invoice } from "../models/invoiceModel.js";
+import { Quotation } from "../models/quotationModel.js";
 import { Customer } from "../models/customerModel.js";
 import { Signature } from "../models/sigModel.js";
 import { Bank } from "../models/bankModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 
-// CREATE INVOICE
-export const createInvoice = catchAsyncError(async (req, res, next) => {
+// CREATE Quotation
+export const createQuotation = catchAsyncError(async (req, res, next) => {
   const {
     customer,
     bank,
     signature,
     products,
-    invoiceDate,
+    quotationDate,
     dueDate,
     reference,
     notes,
@@ -37,8 +37,8 @@ export const createInvoice = catchAsyncError(async (req, res, next) => {
     throw new ErrorHandler("Minimum one product is required!", 400);
   }
 
-  if (!invoiceDate) {
-    throw new ErrorHandler("Invoice date is required!", 400);
+  if (!quotationDate) {
+    throw new ErrorHandler("Quotation date is required!", 400);
   }
 
   // Find customer with full details
@@ -59,13 +59,13 @@ export const createInvoice = catchAsyncError(async (req, res, next) => {
     if (!foundSig) throw new ErrorHandler("signature not found", 404);
   }
 
-  // Create the invoice with full customer and bank details
-  const invoice = await Invoice.create({
+  // Create the Quotation with full customer and bank details
+  const quotation = await Quotation.create({
     customer: foundCustomer,
     bank: foundBank,
     signature: foundSig,
     products,
-    invoiceDate,
+    quotationDate,
     dueDate,
     reference,
     notes,
@@ -78,19 +78,20 @@ export const createInvoice = catchAsyncError(async (req, res, next) => {
     payments,
   });
 
-  foundCustomer.invoiceId.push(invoice._id);
+  foundCustomer.quotationId.push(quotation._id);
   await foundCustomer.save();
 
   res.status(201).json({
     result: 1,
-    message: "Invoice created successfully",
-    invoice,
+    message: "Quotation created successfully",
+    quotation,
   });
 });
 
-// GET ALL INVOICES
-export const getAllInvoices = catchAsyncError(async (req, res, next) => {
-  const invoices = await Invoice.find()
+// GET ALL Quotations
+
+export const getAllQuotation = catchAsyncError(async (req, res, next) => {
+  const quotation = await Quotation.find()
     .sort({ createdAt: -1 })
     .populate("customer")
     .populate("bank")
@@ -98,67 +99,66 @@ export const getAllInvoices = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     result: 1,
-    invoices,
+    quotation,
   });
 });
 
-// GET SINGLE INVOICE BY ID
-export const getInvoice = catchAsyncError(async (req, res, next) => {
-  const invoice = await Invoice.findById(req.params.id)
+// GET SINGLE Quotation BY ID
+export const getQuotation = catchAsyncError(async (req, res, next) => {
+  const quotation = await Quotation.findById(req.params.id)
     .populate("customer")
     .populate("bank")
     .populate("signature");
 
-  if (!invoice) {
-    throw new ErrorHandler("Invoice not found", 404);
+  if (!quotation) {
+    throw new ErrorHandler("Quotation not found", 404);
   }
 
   res.status(200).json({
     result: 1,
-    invoice,
+    quotation,
   });
 });
 
-// UPDATE INVOICE
-export const updateInvoice = catchAsyncError(async (req, res, next) => {
-  const invoice = await Invoice.findById(req.params.id);
+// UPDATE Quotation
+export const updateQuotation = catchAsyncError(async (req, res, next) => {
+  const quotation = await Quotation.findById(req.params.id);
 
-  if (!invoice) {
-    throw new ErrorHandler("Invoice not found", 404);
+  if (!quotation) {
+    throw new ErrorHandler("Quotation not found", 404);
   }
 
   const updates = req.body;
-  Object.assign(invoice, updates);
-  await invoice.save();
+  Object.assign(quotation, updates);
+  await quotation.save();
 
   res.status(200).json({
     result: 1,
-    message: "Invoice updated successfully",
-    invoice,
+    message: "Quotation updated successfully",
+    quotation,
   });
 });
 
-// DELETE INVOICE
-export const deleteInvoice = catchAsyncError(async (req, res, next) => {
-  const invoice = await Invoice.findById(req.params.id);
+// DELETE Quotation
+export const deleteQuotation = catchAsyncError(async (req, res, next) => {
+  const quotation = await Quotation.findById(req.params.id);
 
-  if (!invoice) {
-    throw new ErrorHandler("Invoice not found", 404);
+  if (!quotation) {
+    throw new ErrorHandler("Quotation not found", 404);
   }
 
-  await invoice.deleteOne();
+  await quotation.deleteOne();
 
   res.status(200).json({
     result: 1,
-    message: "Invoice deleted successfully",
+    message: "Quotation deleted successfully",
   });
 });
-
 
 
 
 // SEARCH INVOICES BY CUSTOMER NAME
-export const searchInvoicesByCustomerName = catchAsyncError(async (req, res, next) => {
+export const searchQuotationByCustomerName = catchAsyncError(async (req, res, next) => {
   const searchQuery = req.query.name?.trim();
 
   if (!searchQuery) {
@@ -166,7 +166,7 @@ export const searchInvoicesByCustomerName = catchAsyncError(async (req, res, nex
   }
 
   // Step 1: Find invoices with populated customer
-  const invoices = await Invoice.find()
+  const invoices = await Quotation.find()
     .populate({
       path: "customer",
       match: { name: { $regex: searchQuery, $options: "i" } }, // Case-insensitive match

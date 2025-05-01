@@ -13,6 +13,8 @@ import productRouter from "./routes/productRoute.js";
 import bankRouter from "./routes/bankRoute.js";
 import sigRouter from "./routes/sigRoute.js";
 import invoiceRouter from "./routes/invoiceRoute.js";
+import quotationRouter from "./routes/quotationRoute.js";
+
 
 
 
@@ -62,7 +64,7 @@ app.use("/api/product", productRouter);
 app.use("/api/bank", bankRouter);
 app.use("/api/signature", sigRouter);
 app.use("/api/invoice", invoiceRouter);
-
+app.use("/api/quotation", quotationRouter);
 
 
 
