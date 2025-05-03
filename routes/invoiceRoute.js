@@ -6,6 +6,7 @@ import {
   updateInvoice,
   deleteInvoice,
   searchInvoicesByCustomerName,
+  sendEmailWithPdf,
 } from "../controllers/InvoiceController.js";
 
 const router = express.Router();
@@ -18,7 +19,6 @@ router.get("/all-invoices", getAllInvoices);
 
 router.get("/search", searchInvoicesByCustomerName);
 
-
 // GET /invoice/:id - get a specific invoice by ID
 router.get("/:id", getInvoice);
 
@@ -28,7 +28,9 @@ router.put("/:id", updateInvoice);
 // DELETE /invoice/:id - delete an invoice
 router.delete("/:id", deleteInvoice);
 
+import multer from "multer";
+const upload = multer({ storage: multer.memoryStorage() });
 
-
+router.post("/send-email", upload.single("pdf"), sendEmailWithPdf);
 
 export default router;

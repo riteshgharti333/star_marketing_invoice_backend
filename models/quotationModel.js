@@ -35,7 +35,7 @@ const productItemSchema = new mongoose.Schema({
     enum: ["%", "₹"],
     default: "%",
   },
-  totalAmount: Number, 
+  totalAmount: Number,
 });
 
 const quotationSchema = new mongoose.Schema({
@@ -76,6 +76,11 @@ const quotationSchema = new mongoose.Schema({
   },
   totalDiscount: Number,
   amountBalance: Number,
+
+  moneyReceived: {
+    type: Boolean,
+    default: false,
+  },
 
   payments: [paymentSchema],
   createdAt: {

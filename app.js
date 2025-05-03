@@ -15,10 +15,6 @@ import sigRouter from "./routes/sigRoute.js";
 import invoiceRouter from "./routes/invoiceRoute.js";
 import quotationRouter from "./routes/quotationRoute.js";
 
-
-
-
-
 // Initialize Express app
 export const app = express();
 
@@ -65,8 +61,6 @@ app.use("/api/bank", bankRouter);
 app.use("/api/signature", sigRouter);
 app.use("/api/invoice", invoiceRouter);
 app.use("/api/quotation", quotationRouter);
-
-
 
 app.get("/", (req, res) => {
   res.send("Welcome to Backend");

@@ -23,6 +23,7 @@ export const createQuotation = catchAsyncError(async (req, res, next) => {
     totalDiscount,
     amountBalance,
     payments,
+    moneyReceived
   } = req.body;
 
   if (!customer) {
@@ -76,6 +77,7 @@ export const createQuotation = catchAsyncError(async (req, res, next) => {
     amountBalance,
     totalDiscount,
     payments,
+    moneyReceived
   });
 
   foundCustomer.quotationId.push(quotation._id);
@@ -147,7 +149,14 @@ export const deleteQuotation = catchAsyncError(async (req, res, next) => {
     throw new ErrorHandler("Quotation not found", 404);
   }
 
+  const customerId = quotation.customer;
   await quotation.deleteOne();
+
+  if (customerId) {
+    await Customer.findByIdAndUpdate(customerId, {
+      $pull: { quotationId: quotation._id },
+    });
+  }
 
   res.status(200).json({
     result: 1,
@@ -155,30 +164,30 @@ export const deleteQuotation = catchAsyncError(async (req, res, next) => {
   });
 });
 
-
-
 // SEARCH INVOICES BY CUSTOMER NAME
-export const searchQuotationByCustomerName = catchAsyncError(async (req, res, next) => {
-  const searchQuery = req.query.name?.trim();
+export const searchQuotationByCustomerName = catchAsyncError(
+  async (req, res, next) => {
+    const searchQuery = req.query.name?.trim();
 
-  if (!searchQuery) {
-    throw new ErrorHandler("Customer name query is required", 400);
+    if (!searchQuery) {
+      throw new ErrorHandler("Customer name query is required", 400);
+    }
+
+    // Step 1: Find invoices with populated customer
+    const invoices = await Quotation.find()
+      .populate({
+        path: "customer",
+        match: { name: { $regex: searchQuery, $options: "i" } }, // Case-insensitive match
+      })
+      .populate("bank")
+      .populate("signature");
+
+    // Step 2: Filter out invoices where customer was not matched
+    const matchedInvoices = invoices.filter((inv) => inv.customer !== null);
+
+    res.status(200).json({
+      result: 1,
+      invoices: matchedInvoices,
+    });
   }
-
-  // Step 1: Find invoices with populated customer
-  const invoices = await Quotation.find()
-    .populate({
-      path: "customer",
-      match: { name: { $regex: searchQuery, $options: "i" } }, // Case-insensitive match
-    })
-    .populate("bank")
-    .populate("signature");
-
-  // Step 2: Filter out invoices where customer was not matched
-  const matchedInvoices = invoices.filter(inv => inv.customer !== null);
-
-  res.status(200).json({
-    result: 1,
-    invoices: matchedInvoices,
-  });
-});
+);

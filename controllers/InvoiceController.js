@@ -23,6 +23,7 @@ export const createInvoice = catchAsyncError(async (req, res, next) => {
     totalDiscount,
     amountBalance,
     payments,
+    moneyReceived,
   } = req.body;
 
   if (!customer) {
@@ -76,6 +77,7 @@ export const createInvoice = catchAsyncError(async (req, res, next) => {
     amountBalance,
     totalDiscount,
     payments,
+    moneyReceived,
   });
 
   foundCustomer.invoiceId.push(invoice._id);
@@ -146,7 +148,14 @@ export const deleteInvoice = catchAsyncError(async (req, res, next) => {
     throw new ErrorHandler("Invoice not found", 404);
   }
 
+  const customerId = invoice.customer;
   await invoice.deleteOne();
+
+  if (customerId) {
+    await Customer.findByIdAndUpdate(customerId, {
+      $pull: { invoiceId: invoice._id },
+    });
+  }
 
   res.status(200).json({
     result: 1,
@@ -154,31 +163,68 @@ export const deleteInvoice = catchAsyncError(async (req, res, next) => {
   });
 });
 
-
-
-
 // SEARCH INVOICES BY CUSTOMER NAME
-export const searchInvoicesByCustomerName = catchAsyncError(async (req, res, next) => {
-  const searchQuery = req.query.name?.trim();
+export const searchInvoicesByCustomerName = catchAsyncError(
+  async (req, res, next) => {
+    const searchQuery = req.query.name?.trim();
 
-  if (!searchQuery) {
-    throw new ErrorHandler("Customer name query is required", 400);
+    if (!searchQuery) {
+      throw new ErrorHandler("Customer name query is required", 400);
+    }
+
+    // Step 1: Find invoices with populated customer
+    const invoices = await Invoice.find()
+      .populate({
+        path: "customer",
+        match: { name: { $regex: searchQuery, $options: "i" } }, // Case-insensitive match
+      })
+      .populate("bank")
+      .populate("signature");
+
+    // Step 2: Filter out invoices where customer was not matched
+    const matchedInvoices = invoices.filter((inv) => inv.customer !== null);
+
+    res.status(200).json({
+      result: 1,
+      invoices: matchedInvoices,
+    });
   }
+);
 
-  // Step 1: Find invoices with populated customer
-  const invoices = await Invoice.find()
-    .populate({
-      path: "customer",
-      match: { name: { $regex: searchQuery, $options: "i" } }, // Case-insensitive match
-    })
-    .populate("bank")
-    .populate("signature");
+import nodemailer from 'nodemailer';
 
-  // Step 2: Filter out invoices where customer was not matched
-  const matchedInvoices = invoices.filter(inv => inv.customer !== null);
-
-  res.status(200).json({
-    result: 1,
-    invoices: matchedInvoices,
-  });
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
 });
+
+
+export const sendEmailWithPdf = async (req, res) => {
+  try {
+    const { recipientEmail, subject, message } = req.body;
+    const pdfFile = req.file;
+
+    if (!pdfFile) {
+      return res.status(400).json({ error: 'No PDF file uploaded' });
+    }
+
+    await transporter.sendMail({
+      from: `"Your Company" <${process.env.EMAIL_USER}>`,
+      to: recipientEmail,
+      subject: subject || 'Your PDF Document',
+      text: message || 'Please find attached your requested PDF document.',
+      attachments: [{
+        filename: pdfFile.originalname || 'document.pdf',
+        content: pdfFile.buffer,
+      }],
+    });
+
+    res.status(200).json({ success: true, message: 'Email sent successfully' });
+  } catch (error) {
+    console.error('Email sending error:', error);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
+};
