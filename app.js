@@ -15,6 +15,8 @@ import sigRouter from "./routes/sigRoute.js";
 import invoiceRouter from "./routes/invoiceRoute.js";
 import quotationRouter from "./routes/quotationRoute.js";
 
+import ErrorHandler from "./utils/errorHandler.js";
+
 // Initialize Express app
 export const app = express();
 
@@ -54,15 +56,15 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", authRouter);
-app.use("/api/customer", customerRouter);
-app.use("/api/product", productRouter);
-app.use("/api/bank", bankRouter);
-app.use("/api/signature", sigRouter);
-app.use("/api/invoice", invoiceRouter);
-app.use("/api/quotation", quotationRouter);
+app.use("/backend/api/auth", authRouter);
+app.use("/backend/api/customer", customerRouter);
+app.use("/backend/api/product", productRouter);
+app.use("/backend/api/bank", bankRouter);
+app.use("/backend/api/signature", sigRouter);
+app.use("/backend/api/invoice", invoiceRouter);
+app.use("/backend/api/quotation", quotationRouter);
 
-app.get("/", (req, res) => {
+app.get("/backend", (req, res) => {
   res.send("Welcome to Backend");
 });
 

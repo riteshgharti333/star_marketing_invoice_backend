@@ -6,6 +6,32 @@ import bcrypt from "bcrypt";
 // import jwt from "jsonwebtoken";
 // import nodemailer from "nodemailer";
 
+// LOGIN
+export const login = catchAsyncError(async (req, res, next) => {
+  const { email, password } = req.body;
+
+
+  if (!email || !password) {
+    return next(new ErrorHandler("Email and Password are required", 400));
+  }
+
+  const user = await Auth.findOne({ email }).select("+password");
+
+  if (!user) {
+    return next(new ErrorHandler("Invalid Email or Password", 401));
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
+    return next(new ErrorHandler("Invalid Email or Password", 401));
+  }
+
+  user.password = undefined;
+
+  sendCookie(user, res, "Login Successfully", 200);
+});
+
 // REGISTER
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -31,30 +57,7 @@ export const register = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// LOGIN
-export const login = catchAsyncError(async (req, res, next) => {
-  const { email, password } = req.body;
 
-  if (!email || !password) {
-    return next(new ErrorHandler("Email and Password are required", 400));
-  }
-
-  const user = await Auth.findOne({ email }).select("+password");
-
-  if (!user) {
-    return next(new ErrorHandler("Invalid Email or Password", 401));
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-
-  if (!isMatch) {
-    return next(new ErrorHandler("Invalid Email or Password", 401));
-  }
-
-  user.password = undefined;
-
-  sendCookie(user, res, "Login Successfully", 200);
-});
 
 // LOGOUT
 export const logout = catchAsyncError(async (req, res, next) => {

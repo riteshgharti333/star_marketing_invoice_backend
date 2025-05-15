@@ -122,6 +122,7 @@ export const getInvoice = catchAsyncError(async (req, res, next) => {
 });
 
 // UPDATE INVOICE
+
 export const updateInvoice = catchAsyncError(async (req, res, next) => {
   const invoice = await Invoice.findById(req.params.id);
 
@@ -129,13 +130,44 @@ export const updateInvoice = catchAsyncError(async (req, res, next) => {
     throw new ErrorHandler("Invoice not found", 404);
   }
 
-  const updates = req.body;
-  Object.assign(invoice, updates);
+  const { paymentAmount, paymentDate, paymentMode, notes } = req.body;
+
+  if (!paymentAmount || paymentAmount <= 0) {
+    throw new ErrorHandler("Invalid payment amount", 400);
+  }
+
+  // Subtract payment from balance
+  invoice.amountBalance -= paymentAmount;
+
+  // Prevent negative balance
+  if (invoice.amountBalance < 0) {
+    invoice.amountBalance = 0;
+  }
+
+  // Determine if this payment completes the invoice
+  const isFullyPaid = invoice.amountBalance === 0;
+
+  const newPayment = {
+    amount: paymentAmount,
+    paidAt: paymentDate || new Date(),
+    mode: paymentMode,
+    notes: notes || "",
+    isFullyPaid, // only this payment is updated
+  };
+
+  // Push new payment
+  invoice.payments.push(newPayment);
+
+  // If invoice is fully paid, set flag
+  if (isFullyPaid) {
+    invoice.moneyReceived = true;
+  }
+
   await invoice.save();
 
   res.status(200).json({
     result: 1,
-    message: "Invoice updated successfully",
+    message: "Invoice updated with payment",
     invoice,
   });
 });
@@ -191,16 +223,15 @@ export const searchInvoicesByCustomerName = catchAsyncError(
   }
 );
 
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL,
     pass: process.env.PASSWORD,
   },
 });
-
 
 export const sendEmailWithPdf = async (req, res) => {
   try {
@@ -208,23 +239,25 @@ export const sendEmailWithPdf = async (req, res) => {
     const pdfFile = req.file;
 
     if (!pdfFile) {
-      return res.status(400).json({ error: 'No PDF file uploaded' });
+      return res.status(400).json({ error: "No PDF file uploaded" });
     }
 
     await transporter.sendMail({
       from: `"Your Company" <${process.env.EMAIL_USER}>`,
       to: recipientEmail,
-      subject: subject || 'Your PDF Document',
-      text: message || 'Please find attached your requested PDF document.',
-      attachments: [{
-        filename: pdfFile.originalname || 'document.pdf',
-        content: pdfFile.buffer,
-      }],
+      subject: subject || "Your PDF Document",
+      text: message || "Please find attached your requested PDF document.",
+      attachments: [
+        {
+          filename: pdfFile.originalname || "document.pdf",
+          content: pdfFile.buffer,
+        },
+      ],
     });
 
-    res.status(200).json({ success: true, message: 'Email sent successfully' });
+    res.status(200).json({ success: true, message: "Email sent successfully" });
   } catch (error) {
-    console.error('Email sending error:', error);
-    res.status(500).json({ error: 'Failed to send email' });
+    console.error("Email sending error:", error);
+    res.status(500).json({ error: "Failed to send email" });
   }
 };
