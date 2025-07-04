@@ -3,3 +3,5 @@
 .env
 /config.env
 /data/config.env
+
+*.zip

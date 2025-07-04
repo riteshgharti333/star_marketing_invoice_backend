@@ -10,7 +10,6 @@ import bcrypt from "bcrypt";
 export const login = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
 
-
   if (!email || !password) {
     return next(new ErrorHandler("Email and Password are required", 400));
   }
@@ -33,6 +32,7 @@ export const login = catchAsyncError(async (req, res, next) => {
 });
 
 // REGISTER
+
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
 
@@ -46,7 +46,9 @@ export const register = catchAsyncError(async (req, res, next) => {
     throw new ErrorHandler("Email Already Registered", 409);
   }
 
-  const user = await Auth.create({ name, email, password });
+  const isAdmin = email === process.env.ADMIN_EMAIL;
+
+  const user = await Auth.create({ name, email, password, isAdmin });
 
   user.password = undefined;
 
@@ -56,8 +58,6 @@ export const register = catchAsyncError(async (req, res, next) => {
     user,
   });
 });
-
-
 
 // LOGOUT
 export const logout = catchAsyncError(async (req, res, next) => {
@@ -79,7 +79,7 @@ export const logout = catchAsyncError(async (req, res, next) => {
 export const profile = catchAsyncError(async (req, res, next) => {
   if (!req.user) {
     return next(
-      new ErrorHandler("Unauthorized: Please login to access profile", 401),
+      new ErrorHandler("Unauthorized: Please login to access profile", 401)
     );
   }
 
@@ -102,7 +102,7 @@ export const changePassword = catchAsyncError(async (req, res, next) => {
 
   if (!oldPassword || !newPassword) {
     return next(
-      new ErrorHandler("Old password and new password are required", 400),
+      new ErrorHandler("Old password and new password are required", 400)
     );
   }
 
@@ -110,8 +110,8 @@ export const changePassword = catchAsyncError(async (req, res, next) => {
     return next(
       new ErrorHandler(
         "Unauthorized: You must be logged in to change password",
-        401,
-      ),
+        401
+      )
     );
   }
 
@@ -129,7 +129,7 @@ export const changePassword = catchAsyncError(async (req, res, next) => {
   const isSamePassword = await bcrypt.compare(newPassword, user.password);
   if (isSamePassword) {
     return next(
-      new ErrorHandler("New password cannot be the same as the old one", 400),
+      new ErrorHandler("New password cannot be the same as the old one", 400)
     );
   }
 

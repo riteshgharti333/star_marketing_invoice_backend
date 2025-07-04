@@ -1,6 +1,5 @@
 import express from "express";
 
-import { isAuthenticated } from "../middlewares/auth.js";
 import {
   createproduct,
   deleteProduct,
@@ -9,17 +8,19 @@ import {
   searchProductsByName,
   updateProduct,
 } from "../controllers/ProductController.js";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+import { isAdmin } from "../middlewares/isAdmin.js";
 
 const router = express.Router();
 
-router.post("/new-product", createproduct);
+router.post("/new-product", isAuthenticated, isAdmin, createproduct);
 router.get("/all-products", getAllProducts);
 
 router.get("/search", searchProductsByName);
 
 router.get("/:id", getProduct);
 
-router.post("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+router.post("/:id", isAuthenticated, isAdmin, updateProduct);
+router.delete("/:id", isAuthenticated, isAdmin, deleteProduct);
 
 export default router;

@@ -8,7 +8,7 @@ import {
   register,
 } from "../controllers/AuthController.js";
 
-import { isAuthenticated } from "../middlewares/auth.js";
+import {isAuthenticated} from "../middlewares/isAuthenticated.js"
 
 const router = express.Router();
 
@@ -21,7 +21,5 @@ router.post("/logout", logout);
 router.put("/change-password", isAuthenticated, changePassword);
 
 router.get("/profile", isAuthenticated, profile);
-
-
 
 export default router;

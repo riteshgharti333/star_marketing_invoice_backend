@@ -9,10 +9,15 @@ import {
   sendEmailWithPdf,
 } from "../controllers/InvoiceController.js";
 
+import multer from "multer";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+import { isAdmin } from "../middlewares/isAdmin.js";
+const upload = multer({ storage: multer.memoryStorage() });
+
 const router = express.Router();
 
 // POST /invoice - create a new invoice
-router.post("/new-invoice", createInvoice);
+router.post("/new-invoice", isAuthenticated, isAdmin, createInvoice);
 
 // GET /invoice - get all invoices
 router.get("/all-invoices", getAllInvoices);
@@ -23,14 +28,17 @@ router.get("/search", searchInvoicesByCustomerName);
 router.get("/:id", getInvoice);
 
 // PUT /invoice/:id - update an invoice
-router.put("/:id", updateInvoice);
+router.put("/:id", isAuthenticated, isAdmin, updateInvoice);
 
 // DELETE /invoice/:id - delete an invoice
-router.delete("/:id", deleteInvoice);
+router.delete("/:id", isAuthenticated, isAdmin, deleteInvoice);
 
-import multer from "multer";
-const upload = multer({ storage: multer.memoryStorage() });
-
-router.post("/send-email", upload.single("pdf"), sendEmailWithPdf);
+router.post(
+  "/send-email",
+  isAuthenticated,
+  isAdmin,
+  upload.single("pdf"),
+  sendEmailWithPdf
+);
 
 export default router;
