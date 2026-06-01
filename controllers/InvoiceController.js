@@ -220,7 +220,7 @@ export const searchInvoicesByCustomerName = catchAsyncError(
       result: 1,
       invoices: matchedInvoices,
     });
-  }
+  },
 );
 
 import nodemailer from "nodemailer";

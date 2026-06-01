@@ -13,7 +13,7 @@ const signatureSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Signature = mongoose.model("Signature", signatureSchema);

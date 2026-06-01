@@ -23,7 +23,7 @@ export const createQuotation = catchAsyncError(async (req, res, next) => {
     totalDiscount,
     amountBalance,
     payments,
-    moneyReceived
+    moneyReceived,
   } = req.body;
 
   if (!customer) {
@@ -77,7 +77,7 @@ export const createQuotation = catchAsyncError(async (req, res, next) => {
     amountBalance,
     totalDiscount,
     payments,
-    moneyReceived
+    moneyReceived,
   });
 
   foundCustomer.quotationId.push(quotation._id);
@@ -189,5 +189,5 @@ export const searchQuotationByCustomerName = catchAsyncError(
       result: 1,
       invoices: matchedInvoices,
     });
-  }
+  },
 );

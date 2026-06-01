@@ -34,7 +34,7 @@ const bankSchema = new mongoose.Schema(
       lowercase: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Bank = mongoose.model("Bank", bankSchema);

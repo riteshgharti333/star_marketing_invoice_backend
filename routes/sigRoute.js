@@ -20,7 +20,7 @@ router.post(
   isAdmin,
   imageHandler.upload.single("signatureImage"),
   imageHandler.processImage,
-  createSignature
+  createSignature,
 );
 
 router.get("/all-signatures", getAllSignatures);

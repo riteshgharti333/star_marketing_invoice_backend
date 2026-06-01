@@ -29,7 +29,7 @@ const authSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // 🔹 Hash password before saving to the database

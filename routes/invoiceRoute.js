@@ -38,7 +38,7 @@ router.post(
   isAuthenticated,
   isAdmin,
   upload.single("pdf"),
-  sendEmailWithPdf
+  sendEmailWithPdf,
 );
 
 export default router;
